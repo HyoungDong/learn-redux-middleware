@@ -19,6 +19,11 @@ const GET_POST_ERROR = 'posts/GET_POST_ERROR';
 
 export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts);
 export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById);
+export const goToHome =
+  () =>
+  (dispatch, getState, { history }) => {
+    history.push('/');
+  };
 // const clearPost = () => ({ type: CLEAR_POST });
 
 // thunk 함수에서도 파라미터를 받아와서 사용 할 수 있습니다.
