@@ -10,7 +10,7 @@ const GET_POST_SUCCESS = 'posts/GET_POST_SUCCESS';
 const GET_POST_ERROR = 'posts/GET_POST_ERROR';
 
 export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts);
-export const getPost = createPromiseThunk(GET_POSTS, postsAPI.getPostById);
+export const getPost = createPromiseThunk(GET_POST, postsAPI.getPostById);
 
 // thunk 함수에서도 파라미터를 받아와서 사용 할 수 있습니다.
 
