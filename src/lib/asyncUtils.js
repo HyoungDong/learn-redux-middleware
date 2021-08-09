@@ -10,6 +10,20 @@ export const createPromiseThunk = (type, promiseCreator) => {
     }
   };
 };
+const defaultIdSelector = param => param;
+export const createPromiseThunkById = (type, promiseCreator, idSelector = defaultIdSelector) => {
+  const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
+  return param => async dispatch => {
+    const id = idSelector(param);
+    dispatch({ type, meta: id }); // 요청이 시작됨
+    try {
+      const payload = await promiseCreator(param); // API 호출
+      dispatch({ type: SUCCESS, payload, meta: id }); // 성공
+    } catch (e) {
+      dispatch({ type: ERROR, payload: e, error: true, meta: id }); // 실패
+    }
+  };
+};
 
 // 리듀서에서 사용 할 수 있는 여러 유틸 함수들입니다.
 export const reducerUtils = {
@@ -59,6 +73,41 @@ export const handleAsyncActions = (type, key, keepData) => {
         return {
           ...state,
           [key]: reducerUtils.error(action.payload),
+        };
+      default:
+        return state;
+    }
+  };
+};
+
+export const handleAsyncActionsById = (type, key, keepData) => {
+  const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
+  return (state, action) => {
+    const id = action.meta;
+    switch (action.type) {
+      case type:
+        return {
+          ...state,
+          [key]: {
+            ...state[key],
+            [id]: reducerUtils.loading(keepData ? state[key][id]?.data : null),
+          },
+        };
+      case SUCCESS:
+        return {
+          ...state,
+          [key]: {
+            ...state[key],
+            [id]: reducerUtils.success(action.payload),
+          },
+        };
+      case ERROR:
+        return {
+          ...state,
+          [key]: {
+            ...state[key],
+            [id]: reducerUtils.error(action.payload),
+          },
         };
       default:
         return state;
