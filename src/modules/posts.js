@@ -1,7 +1,8 @@
+import { call, put, takeEvery } from '@redux-saga/core/effects';
 import * as postsAPI from '../api/posts';
 import {
-  createPromiseThunk,
-  createPromiseThunkById,
+  //   createPromiseThunk,
+  //   createPromiseThunkById,
   handleAsyncActions,
   handleAsyncActionsById,
   reducerUtils,
@@ -17,8 +18,10 @@ const GET_POST_ERROR = 'posts/GET_POST_ERROR';
 
 //const CLEAR_POST = 'posts/CLEAR_POST';
 
-export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts);
-export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById);
+// export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts);
+// export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById);
+export const getPosts = () => ({ type: GET_POSTS });
+export const getPost = id => ({ type: GET_POST, payload: id, meta: id });
 export const goToHome =
   () =>
   (dispatch, getState, { history }) => {
@@ -28,6 +31,45 @@ export const goToHome =
 
 // thunk 함수에서도 파라미터를 받아와서 사용 할 수 있습니다.
 
+function* getPostsSaga() {
+  try {
+    const posts = yield call(postsAPI.getPosts);
+    yield put({
+      type: GET_POSTS_SUCCESS,
+      payload: posts,
+    });
+  } catch (e) {
+    yield put({
+      type: GET_POSTS_ERROR,
+      payload: e,
+      error: true,
+    });
+  }
+}
+
+function* getPostSaga(action) {
+  const id = action.payload;
+  try {
+    const post = yield call(postsAPI.getPostById, id);
+    yield put({
+      type: GET_POST_SUCCESS,
+      payload: post,
+      meta: id,
+    });
+  } catch (e) {
+    yield put({
+      type: GET_POST_ERROR,
+      payload: e,
+      error: true,
+      meta: id,
+    });
+  }
+}
+
+export function* postSaga() {
+  yield takeEvery(GET_POSTS, getPostsSaga);
+  yield takeEvery(GET_POST, getPostSaga);
+}
 const initialState = {
   posts: reducerUtils.initial(),
   post: reducerUtils.initial(),
